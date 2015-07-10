@@ -1,51 +1,23 @@
 module StyleGuide
   class JavaScript < Base
-    DEFAULT_CONFIG_FILENAME = "javascript.json"
+    LANGUAGE = "javascript"
 
     def file_review(commit_file)
-      FileReview.new(filename: commit_file.filename) do |file_review|
-        Jshintrb.lint(commit_file.content, config).compact.each do |violation|
-          line = commit_file.line_at(violation["line"])
-          file_review.build_violation(line, violation["reason"])
-        end
-        file_review.complete
-      end
+      Resque.enqueue(
+        JavaScriptReviewJob,
+        filename: commit_file.filename,
+        commit_sha: commit_file.sha,
+        pull_request_number: commit_file.pull_request_number,
+        patch: commit_file.patch,
+        content: commit_file.content,
+        config: repo_config.raw_for(LANGUAGE)
+      )
+
+      FileReview.new(filename: commit_file.filename)
     end
 
-    def file_included?(commit_file)
-      !excluded_files.any? do |pattern|
-        File.fnmatch?(pattern, commit_file.filename)
-      end
-    end
-
-    private
-
-    def config
-      custom_config = repo_config.for(name)
-      if custom_config["predef"].present?
-        custom_config["predef"] |= default_config["predef"]
-      end
-      default_config.merge(custom_config)
-    end
-
-    def excluded_files
-      repo_config.ignored_javascript_files
-    end
-
-    def default_config
-      config_file = File.read(default_config_file)
-      JSON.parse(config_file)
-    end
-
-    def default_config_file
-      DefaultConfigFile.new(
-        DEFAULT_CONFIG_FILENAME,
-        repository_owner_name
-      ).path
-    end
-
-    def name
-      "javascript"
+    def file_included?(_)
+      true
     end
   end
 end
