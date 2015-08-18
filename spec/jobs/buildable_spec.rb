@@ -1,10 +1,4 @@
-require "spec_helper"
-require "active_job"
-require "app/jobs/buildable"
-require "app/models/payload"
-require "app/services/build_runner"
-require "app/services/repo_updater"
-require "raven"
+require "rails_helper"
 
 describe Buildable do
   class BuildableTestJob < ActiveJob::Base
@@ -39,15 +33,7 @@ describe Buildable do
     end
   end
 
-  def payload_data(github_id: 1234, name: "test")
-    {
-      "repository" => {
-        "owner" => {
-          "id" => github_id,
-          "login" => name,
-          "type" => "Organization"
-        }
-      }
-    }
+  def payload_data
+    "anything"
   end
 end
