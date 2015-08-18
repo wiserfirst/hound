@@ -13,13 +13,10 @@ describe Buildable do
 
   describe "perform" do
     it 'runs build runner' do
-      stub_const("Owner", "foo")
       build_runner = double(:build_runner, run: nil)
-      payload_data = "some data"
       payload = double("Payload", github_repo_id: 1)
       allow(Payload).to receive(:new).with(payload_data).and_return(payload)
       allow(BuildRunner).to receive(:new).and_return(build_runner)
-      allow(Owner).to receive(:upsert)
 
       BuildableTestJob.perform_now(payload_data)
 
