@@ -1,6 +1,6 @@
 module AnalyticsHelper
   def analytics?
-    ENV["SEGMENT_KEY"]
+    ENV["SEGMENT_KEY"].present?
   end
 
   def identify_hash(user = current_user)

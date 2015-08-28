@@ -2,18 +2,22 @@ require "rails_helper"
 
 describe AnalyticsHelper do
   describe "#analytics?" do
-    it 'is true when ENV["SEGMENT_KEY"] is present' do
-      ENV["SEGMENT_KEY"] = "anything"
+    context "when SEGMENT_KEY is present" do
+      it "returns true" do
+        ENV["SEGMENT_KEY"] = "anything"
 
-      expect(analytics?).to be_truthy
+        expect(analytics?).to be_truthy
 
-      ENV["SEGMENT_KEY"] = nil
+        ENV["SEGMENT_KEY"] = nil
+      end
     end
 
-    it 'is false when ENV["SEGMENT_KEY"] is not present' do
-      ENV["SEGMENT_KEY"] = nil
+    context "when SEGMENT_KEY is not present" do
+      it "returns false" do
+        ENV["SEGMENT_KEY"] = nil
 
-      expect(analytics?).to be_falsy
+        expect(analytics?).to be_falsy
+      end
     end
 
     describe "identify_hash" do
