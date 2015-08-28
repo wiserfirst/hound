@@ -35,7 +35,7 @@ module GithubApiHelper
     )
   end
 
-  def stub_repo_with_org_request(repo_name, token = hound_token)
+  def stub_repo_with_org_request(repo_name, token)
     stub_request(
       :get,
       "https://api.github.com/repos/#{repo_name}"

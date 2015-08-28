@@ -7,7 +7,7 @@ require "app/models/github_user"
 describe GithubApi do
   describe "#repos" do
     it "fetches all repos from Github" do
-      token = "something"
+      token = Hound::GITHUB_TOKEN
       api = GithubApi.new(token)
       stub_repos_requests(token)
 
@@ -34,7 +34,7 @@ describe GithubApi do
       it "requests file content once" do
         client = double("Octokit::Client", contents: "filecontent")
         allow(Octokit::Client).to receive(:new).and_return(client)
-        token = "authtoken"
+        token = Hound::GITHUB_TOKEN
         github = GithubApi.new(token)
         repo = "jimtom/wow"
         filename = ".hound.yml"
@@ -62,7 +62,7 @@ describe GithubApi do
     context "when hook does not exist" do
       it "creates pull request web hook" do
         callback_endpoint = "http://example.com"
-        token = "something"
+        token = Hound::GITHUB_TOKEN
         api = GithubApi.new(token)
         request = stub_hook_creation_request(
           full_repo_name,
@@ -77,7 +77,7 @@ describe GithubApi do
 
       it "yields hook" do
         callback_endpoint = "http://example.com"
-        token = "something"
+        token = Hound::GITHUB_TOKEN
         api = GithubApi.new(token)
         request = stub_hook_creation_request(
           full_repo_name,
@@ -309,7 +309,7 @@ describe GithubApi do
 
   describe "#add_user_to_team" do
     it "makes a request to GitHub" do
-      token = "some_token"
+      token = Hound::GITHUB_TOKEN
       username = "houndci"
       team_id = 123
       api = GithubApi.new(token)
@@ -323,7 +323,7 @@ describe GithubApi do
 
   describe "#add_repo_to_team" do
     it "makes a request to GitHub" do
-      token = "some_token"
+      token = Hound::GITHUB_TOKEN
       team_id = 123
       api = GithubApi.new(token)
       request = stub_add_repo_to_team_request(full_repo_name, team_id, token)
@@ -336,7 +336,7 @@ describe GithubApi do
 
   describe "#create_team" do
     it "makes a request to GitHub" do
-      token = "some_token"
+      token = Hound::GITHUB_TOKEN
       org_name = "foo"
       team_name = "TestTeam"
       api = GithubApi.new(token)
