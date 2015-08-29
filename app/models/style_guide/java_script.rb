@@ -15,7 +15,7 @@ module StyleGuide
     end
 
     def file_included?(commit_file)
-      !excluded_files.any? do |pattern|
+      excluded_files.none? do |pattern|
         File.fnmatch?(pattern, commit_file.filename)
       end
     end
