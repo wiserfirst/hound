@@ -46,7 +46,7 @@ module StyleGuide
     end
 
     def job_class
-      "#{language.capitalize}ReviewJob".constantize
+      "#{language.camelize}ReviewJob".constantize
     end
 
     def language

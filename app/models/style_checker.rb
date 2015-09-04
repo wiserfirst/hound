@@ -42,6 +42,8 @@ class StyleChecker
       StyleGuide::CoffeeScript
     when /.+\.js\z/
       StyleGuide::JavaScript::JsHint
+    when /.+\.es6\z/
+      StyleGuide::JavaScript::EsLint
     when /.+\.haml\z/
       StyleGuide::Haml
     when /.+\.scss\z/
