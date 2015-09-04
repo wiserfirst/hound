@@ -174,15 +174,24 @@ describe StyleChecker do
         end
       end
 
-      context "with an .es6 extension" do
-        it "does not immediately return violations" do
-          commit_file = stub_commit_file("test.es6", "var [a, , b] = [1,2,3];")
-          pull_request = stub_pull_request(commit_files: [commit_file])
+      context "when es_lint is activated" do
+        context "with an .es6 extension" do
+          it "does not immediately return violations" do
+            commit_file = stub_commit_file(
+              "test.es6",
+              "var [a, , b] = [1,2,3];",
+            )
+            pull_request = stub_pull_request(commit_files: [commit_file])
 
-          violation_messages = pull_request_violations(pull_request)
+            violation_messages = pull_request_violations(pull_request)
 
-          expect(violation_messages).to be_empty
+            expect(violation_messages).to be_empty
+          end
         end
+      end
+
+      context "when es_lint is deactivated" do
+        it "skips the .es6 files"
       end
     end
 
