@@ -1,7 +1,8 @@
 module StyleGuide
   module JavaScript
     class EsLint < Base
-      LANGUAGE = "es_lint"
+      LANGUAGE = "javascript"
+      JOB_CLASS = EsLintReviewJob
 
       def file_included?(_)
         true

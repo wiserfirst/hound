@@ -45,12 +45,12 @@ module StyleGuide
       }
     end
 
-    def job_class
-      "#{language.camelize}ReviewJob".constantize
-    end
-
     def language
       self.class::LANGUAGE
+    end
+
+    def job_class
+      self.class::JOB_CLASS
     end
 
     def name
