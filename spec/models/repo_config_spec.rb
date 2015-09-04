@@ -507,6 +507,50 @@ describe RepoConfig do
     end
   end
 
+  describe "#custom_linter?" do
+    context "when the language is enabled" do
+      context "when the language has a custom linter specified" do
+        it "returns true" do
+          hound_config = <<-EOS.strip_heredoc
+            javascript:
+              linter: "custom_linter"
+          EOS
+          commit = stub_commit(hound_config: hound_config)
+          repo_config = RepoConfig.new(commit)
+
+          expect(repo_config.custom_linter?("javascript")).to be_truthy
+        end
+      end
+
+      context "when the language does not have a custom linter specified" do
+        it "returns false" do
+          hound_config = <<-EOS.strip_heredoc
+            javascript:
+              enabled: true
+          EOS
+          commit = stub_commit(hound_config: hound_config)
+          repo_config = RepoConfig.new(commit)
+
+          expect(repo_config.custom_linter?("javascript")).to be_falsey
+        end
+      end
+    end
+
+    context "when the language is disabled" do
+      it "returns false" do
+        hound_config = <<-EOS.strip_heredoc
+            javascript:
+              enabled: false
+              linter: "custom_linter"
+        EOS
+        commit = stub_commit(hound_config: hound_config)
+        repo_config = RepoConfig.new(commit)
+
+        expect(repo_config.custom_linter?("javascript")).to be_falsey
+      end
+    end
+  end
+
   describe "#raw_for" do
     context "when Ruby config file is specified" do
       it "returns raw config" do

@@ -31,6 +31,10 @@ class RepoConfig
     end
   end
 
+  def custom_linter?(language)
+    enabled_for?(language) && options_for(language)["linter"].present?
+  end
+
   def raw_for(language)
     config_file_path = config_path_for(language)
 
