@@ -41,7 +41,7 @@ class StyleChecker
     when /.+\.coffee(\.js)?(\.erb)?\z/
       StyleGuide::CoffeeScript
     when /.+\.js\z/
-      StyleGuide::JavaScript
+      StyleGuide::JavaScript::JsHint
     when /.+\.haml\z/
       StyleGuide::Haml
     when /.+\.scss\z/
