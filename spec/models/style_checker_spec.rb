@@ -304,9 +304,11 @@ describe StyleChecker do
     def stub_repo_config
       double(
         "RepoConfig",
+        custom_linter?: false,
         enabled_for?: true,
         for: {},
-        ignored_javascript_files: []
+        ignored_javascript_files: [],
+        raw_for: "",
       )
     end
 

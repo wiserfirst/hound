@@ -518,7 +518,7 @@ describe RepoConfig do
           commit = stub_commit(hound_config: hound_config)
           repo_config = RepoConfig.new(commit)
 
-          expect(repo_config.custom_linter?("javascript")).to be_truthy
+          expect(repo_config.custom_linter?("javascript")).to be true
         end
       end
 
@@ -531,7 +531,7 @@ describe RepoConfig do
           commit = stub_commit(hound_config: hound_config)
           repo_config = RepoConfig.new(commit)
 
-          expect(repo_config.custom_linter?("javascript")).to be_falsey
+          expect(repo_config.custom_linter?("javascript")).to be false
         end
       end
     end
@@ -546,7 +546,49 @@ describe RepoConfig do
         commit = stub_commit(hound_config: hound_config)
         repo_config = RepoConfig.new(commit)
 
-        expect(repo_config.custom_linter?("javascript")).to be_falsey
+        expect(repo_config.custom_linter?("javascript")).to be false
+      end
+    end
+  end
+
+  describe "#custom_linter" do
+    context "when the language has a custom linter specified" do
+      it "returns the linter" do
+        hound_config = <<-EOS.strip_heredoc
+            javascript:
+              linter: "custom_linter"
+        EOS
+        commit = stub_commit(hound_config: hound_config)
+        repo_config = RepoConfig.new(commit)
+
+        expect(repo_config.custom_linter("javascript")).to eq "custom_linter"
+      end
+    end
+
+    context "when the language does not have a custom linter specified" do
+      it "returns nil" do
+        hound_config = <<-EOS.strip_heredoc
+            javascript:
+              enabled: true
+        EOS
+        commit = stub_commit(hound_config: hound_config)
+        repo_config = RepoConfig.new(commit)
+
+        expect(repo_config.custom_linter("javascript")).to be nil
+      end
+    end
+
+    context "when the language is disabled" do
+      it "returns nil" do
+        hound_config = <<-EOS.strip_heredoc
+            javascript:
+              enabled: false
+              linter: "custom_linter"
+        EOS
+        commit = stub_commit(hound_config: hound_config)
+        repo_config = RepoConfig.new(commit)
+
+        expect(repo_config.custom_linter("javascript")).to eq "custom_linter"
       end
     end
   end

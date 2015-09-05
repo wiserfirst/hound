@@ -32,7 +32,11 @@ class RepoConfig
   end
 
   def custom_linter?(language)
-    enabled_for?(language) && options_for(language)["linter"].present?
+    enabled_for?(language) && custom_linter(language).present?
+  end
+
+  def custom_linter(language)
+    options_for(language)["linter"]
   end
 
   def raw_for(language)
