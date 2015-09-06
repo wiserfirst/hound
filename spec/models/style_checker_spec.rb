@@ -82,7 +82,7 @@ describe StyleChecker do
       it "is processed with a coffee.js extension" do
         commit_file = stub_commit_file("test.coffee.js", "foo ->")
         pull_request = stub_pull_request(commit_files: [commit_file])
-        allow(RepoConfig).to receive(:new).and_return(stub_repo_config)
+        stub_repo_config
 
         violation_messages = pull_request_violations(pull_request)
 
@@ -95,7 +95,7 @@ describe StyleChecker do
           "class strange_ClassNAME"
         )
         pull_request = stub_pull_request(commit_files: [commit_file])
-        allow(RepoConfig).to receive(:new).and_return(stub_repo_config)
+        stub_repo_config
 
         violation_messages = pull_request_violations(pull_request)
 
@@ -175,52 +175,32 @@ describe StyleChecker do
       end
 
       context "when es_lint is activated" do
-        context "with an .es6 extension" do
-          it "does not immediately return violations" do
-            commit_file = stub_commit_file(
-              "test.es6",
-              "var [a, , b] = [1,2,3];",
-            )
-            pull_request = stub_pull_request(commit_files: [commit_file])
+        it "does not immediately return violations" do
+          commit_file = stub_commit_file(
+            "test.js",
+            "var [a, , b] = [1,2,3];",
+          )
+          repo_config = stub_repo_config(
+            custom_linter?: true,
+            custom_linter: "es_lint",
+          )
+          pull_request = stub_pull_request(commit_files: [commit_file])
 
-            violation_messages = pull_request_violations(pull_request)
+          violation_messages = pull_request_violations(pull_request)
 
-            expect(violation_messages).to be_empty
-          end
+          expect(violation_messages).to be_empty
+          expect(repo_config).to have_received(:custom_linter?).
+            with("javascript").at_least(:once)
         end
       end
 
       context "when es_lint is deactivated" do
-        it "skips the .es6 files"
+        it "skips the es6 files"
       end
-    end
 
-    context "for a SCSS file" do
-      it "does not immediately return violations" do
-        commit_file = stub_commit_file("test.scss", "* { color: red; }")
-        pull_request = stub_pull_request(commit_files: [commit_file])
-
-        violation_messages = pull_request_violations(pull_request)
-
-        expect(violation_messages).to be_empty
-      end
-    end
-
-    context "for a Python file" do
-      it "does not immediately return violations" do
-        commit_file = stub_commit_file("test.py", "import this")
-        pull_request = stub_pull_request(commit_files: [commit_file])
-
-        violation_messages = pull_request_violations(pull_request)
-
-        expect(violation_messages).to be_empty
-      end
-    end
-
-    context "for a Haml file" do
-      context "with style violations" do
-        it "returns no violations" do
-          commit_file = stub_commit_file("test.haml", "%div.message 123")
+      context "for a SCSS file" do
+        it "does not immediately return violations" do
+          commit_file = stub_commit_file("test.scss", "* { color: red; }")
           pull_request = stub_pull_request(commit_files: [commit_file])
 
           violation_messages = pull_request_violations(pull_request)
@@ -229,96 +209,122 @@ describe StyleChecker do
         end
       end
 
-      context "without style violations" do
-        it "returns no violations" do
-          commit_file = stub_commit_file("test.haml", ".message 123")
+      context "for a Python file" do
+        it "does not immediately return violations" do
+          commit_file = stub_commit_file("test.py", "import this")
           pull_request = stub_pull_request(commit_files: [commit_file])
 
           violation_messages = pull_request_violations(pull_request)
 
-          expect(violation_messages).not_to include(
-            "`%div.message` can be written as `.message` since `%div` is implicit"
+          expect(violation_messages).to be_empty
+        end
+      end
+
+      context "for a Haml file" do
+        context "with style violations" do
+          it "returns no violations" do
+            commit_file = stub_commit_file("test.haml", "%div.message 123")
+            pull_request = stub_pull_request(commit_files: [commit_file])
+
+            violation_messages = pull_request_violations(pull_request)
+
+            expect(violation_messages).to be_empty
+          end
+        end
+
+        context "without style violations" do
+          it "returns no violations" do
+            commit_file = stub_commit_file("test.haml", ".message 123")
+            pull_request = stub_pull_request(commit_files: [commit_file])
+
+            violation_messages = pull_request_violations(pull_request)
+
+            expect(violation_messages).not_to include(
+              "`%div.message` can be written as `.message` since `%div` is implicit"
+            )
+          end
+        end
+      end
+
+      context "with unsupported file type" do
+        it "uses unsupported style guide" do
+          commit_file = stub_commit_file(
+            "fortran.f",
+            %{PRINT *, "Hello World!"\nEND}
           )
+          pull_request = stub_pull_request(commit_files: [commit_file])
+
+          violation_messages = pull_request_violations(pull_request)
+
+          expect(violation_messages).to be_empty
         end
       end
     end
+  end
 
-    context "with unsupported file type" do
-      it "uses unsupported style guide" do
-        commit_file = stub_commit_file(
-          "fortran.f",
-          %{PRINT *, "Hello World!"\nEND}
-        )
-        pull_request = stub_pull_request(commit_files: [commit_file])
+  def pull_request_violations(pull_request)
+    build = build(:build)
+    StyleChecker.new(pull_request, build).review_files
 
-        violation_messages = pull_request_violations(pull_request)
+    build.violations.flat_map(&:messages)
+  end
 
-        expect(violation_messages).to be_empty
-      end
+  def stub_pull_request(options = {})
+    head_commit = double("Commit", file_content: "")
+    defaults = {
+      file_content: "",
+      head_commit: head_commit,
+      commit_files: [],
+      repository_owner_name: "some_org"
+    }
+
+    double("PullRequest", defaults.merge(options))
+  end
+
+  def stub_commit_file(filename, contents, line = nil)
+    line ||= Line.new(content: "foo", number: 1, patch_position: 2)
+    formatted_contents = "#{contents}\n"
+    double(
+      "CommitFile",
+      filename: filename,
+      content: formatted_contents,
+      line_at: line,
+      sha: "abc123",
+      patch: "patch",
+      pull_request_number: 123
+    )
+  end
+
+  def stub_head_commit(options)
+    head_commit = double("Commit", file_content: nil)
+
+    options.each do |filename, file_contents|
+      allow(head_commit).to receive(:file_content).
+        with(filename).and_return(file_contents)
     end
 
-    def pull_request_violations(pull_request)
-      build = build(:build)
-      StyleChecker.new(pull_request, build).review_files
+    head_commit
+  end
 
-      build.violations.flat_map(&:messages)
+  def stub_repo_config(options = {})
+    default_options = {
+      enabled_for?: true,
+      for: {},
+      ignored_javascript_files: [],
+      raw_for: "",
+    }
+
+    double("RepoConfig", default_options.merge(options)).tap do |config|
+      allow(RepoConfig).to receive(:new).and_return(config)
     end
+  end
 
-    def stub_pull_request(options = {})
-      head_commit = double("Commit", file_content: "")
-      defaults = {
-        file_content: "",
-        head_commit: head_commit,
-        commit_files: [],
-        repository_owner_name: "some_org"
-      }
-
-      double("PullRequest", defaults.merge(options))
-    end
-
-    def stub_commit_file(filename, contents, line = nil)
-      line ||= Line.new(content: "foo", number: 1, patch_position: 2)
-      formatted_contents = "#{contents}\n"
-      double(
-        "CommitFile",
-        filename: filename,
-        content: formatted_contents,
-        line_at: line,
-        sha: "abc123",
-        patch: "patch",
-        pull_request_number: 123
-      )
-    end
-
-    def stub_head_commit(options)
-      head_commit = double("Commit", file_content: nil)
-
-      options.each do |filename, file_contents|
-        allow(head_commit).to receive(:file_content).
-          with(filename).and_return(file_contents)
-      end
-
-      head_commit
-    end
-
-    def stub_repo_config
-      double(
-        "RepoConfig",
-        custom_linter?: false,
-        enabled_for?: true,
-        for: {},
-        ignored_javascript_files: [],
-        raw_for: "",
-      )
-    end
-
-    def payload_stub
-      double(
-        "Payload",
-        full_repo_name: "foo/bar",
-        head_sha: "abc",
-        repository_owner_name: "ralph",
-      )
-    end
+  def payload_stub
+    double(
+      "Payload",
+      full_repo_name: "foo/bar",
+      head_sha: "abc",
+      repository_owner_name: "ralph",
+    )
   end
 end
