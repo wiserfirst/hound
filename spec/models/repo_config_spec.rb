@@ -577,20 +577,6 @@ describe RepoConfig do
         expect(repo_config.custom_linter("javascript")).to be nil
       end
     end
-
-    context "when the language is disabled" do
-      it "returns nil" do
-        hound_config = <<-EOS.strip_heredoc
-            javascript:
-              enabled: false
-              linter: "custom_linter"
-        EOS
-        commit = stub_commit(hound_config: hound_config)
-        repo_config = RepoConfig.new(commit)
-
-        expect(repo_config.custom_linter("javascript")).to eq "custom_linter"
-      end
-    end
   end
 
   describe "#raw_for" do
