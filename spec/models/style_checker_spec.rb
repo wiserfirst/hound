@@ -195,7 +195,20 @@ describe StyleChecker do
       end
 
       context "when es_lint is deactivated" do
-        it "skips the es6 files"
+        it "falls back to `Styleguide::JsHint`" do
+          commit_file = stub_commit_file(
+            "test.js",
+            "var [a, , b] = [1,2,3];",
+          )
+          stub_repo_config(custom_linter?: false)
+          pull_request = stub_pull_request(commit_files: [commit_file])
+
+          violation_messages = pull_request_violations(pull_request)
+
+          expect(violation_messages).to include(
+            "'destructuring expression' is available in ES6 (use esnext option) or Mozilla JS extensions (use moz).",
+          )
+        end
       end
 
       context "for a SCSS file" do
