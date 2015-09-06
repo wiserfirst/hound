@@ -1,7 +1,5 @@
 module StyleGuide
   class Base
-    attr_implement :file_review
-
     def initialize(repo_config:, build:, repository_owner_name:)
       @repo_config = repo_config
       @build = build
