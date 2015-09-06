@@ -63,16 +63,24 @@ describe StyleGuide do
     end
 
     context "when a coffeescript file is given" do
-      it "supports `coffee.js` as an extension" do
-        filename = "hello.coffee.js"
+      it "returns `StyleGuide::CoffeeScript`" do
+        filename = "hello.coffee"
 
         klass = build_style_guide(filename: filename)
 
         expect(klass).to eq StyleGuide::CoffeeScript
       end
 
-      it "returns `StyleGuide::CoffeeScript`" do
-        filename = "hello.coffee"
+      it "supports `coffee.erb` as an extension" do
+        filename = "hello.coffee.erb"
+
+        klass = build_style_guide(filename: filename)
+
+        expect(klass).to eq StyleGuide::CoffeeScript
+      end
+
+      it "supports `coffee.js` as an extension" do
+        filename = "hello.coffee.js"
 
         klass = build_style_guide(filename: filename)
 
