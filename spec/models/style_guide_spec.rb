@@ -23,12 +23,42 @@ describe StyleGuide do
     end
 
     context "given a javascript file" do
-      it "returns `StyleGuide::JavaScript::JsHint`" do
-        filename = "hello.js"
+      context "when a custom linter is specified" do
+        it "returns the custom linter" do
+          filename = "hello.js"
+          config = build_config(
+            custom_linter?: true,
+            custom_linter: "es_lint",
+          )
 
-        klass = build_style_guide(filename: filename)
+          klass = build_style_guide(filename: filename, config: config)
 
-        expect(klass).to eq StyleGuide::JavaScript::JsHint
+          expect(klass).to eq StyleGuide::JavaScript::EsLint
+        end
+
+        context "when the specified linter does not exist" do
+          it "falls back to JsHint" do
+            filename = "hello.js"
+            config = build_config(
+              custom_linter?: true,
+              custom_linter: "arbitrary",
+            )
+
+            klass = build_style_guide(filename: filename, config: config)
+
+            expect(klass).to eq StyleGuide::JavaScript::JsHint
+          end
+        end
+      end
+
+      context "when a custom linter not is specified" do
+        it "returns `StyleGuide::JavaScript::JsHint`" do
+          filename = "hello.js"
+
+          klass = build_style_guide(filename: filename)
+
+          expect(klass).to eq StyleGuide::JavaScript::JsHint
+        end
       end
     end
 
