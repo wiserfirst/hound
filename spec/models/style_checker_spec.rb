@@ -4,9 +4,11 @@ describe StyleChecker do
   describe "#review_files" do
     it "returns a collection of file reviews with violations" do
       stylish_commit_file = stub_commit_file("good.rb", "def good; end")
-      violated_commit_file = stub_commit_file("bad.rb", "def bad( a ); a; end  ")
+      violated_commit_file = stub_commit_file(
+        "bad.rb", "def bad( a ); a; end  "
+      )
       pull_request = stub_pull_request(
-        commit_files: [stylish_commit_file, violated_commit_file]
+        commit_files: [stylish_commit_file, violated_commit_file],
       )
       expected_violations = [
         "Unnecessary spacing detected.",
@@ -30,7 +32,9 @@ describe StyleChecker do
 
       pull_request_violations(pull_request)
 
-      expect(head_commit).to have_received(:file_content).with(ruby_file.filename)
+      expect(head_commit).to have_received(:file_content).with(
+        ruby_file.filename,
+      )
       expect(head_commit).not_to have_received(:file_content).
         with(bogus_file.filename)
     end
@@ -56,7 +60,7 @@ describe StyleChecker do
           commit_file = stub_commit_file(
             "foo.rb",
             "'wrong quotes'",
-            UnchangedLine.new
+            UnchangedLine.new,
           )
           pull_request = stub_pull_request(commit_files: [commit_file])
 
@@ -92,7 +96,7 @@ describe StyleChecker do
       it "is processed with a coffee.erb extension" do
         commit_file = stub_commit_file(
           "test.coffee.erb",
-          "class strange_ClassNAME"
+          "class strange_ClassNAME",
         )
         pull_request = stub_pull_request(commit_files: [commit_file])
         stub_repo_config
@@ -157,13 +161,13 @@ describe StyleChecker do
 
           head_commit = stub_head_commit(
             ".hound.yml" => config,
-            ".jshintignore" => "test.js"
+            ".jshintignore" => "test.js",
           )
 
           commit_file = stub_commit_file("test.js", "var test = 'test'")
           pull_request = stub_pull_request(
             head_commit: head_commit,
-            commit_files: [commit_file]
+            commit_files: [commit_file],
           )
 
           violation_messages = pull_request_violations(pull_request)
@@ -214,7 +218,7 @@ describe StyleChecker do
             violation_messages = pull_request_violations(pull_request)
 
             expect(violation_messages).not_to include(
-              "`%div.message` can be written as `.message` since `%div` is implicit"
+              "`%div.message` can be written as `.message` since `%div` is implicit",
             )
           end
         end
@@ -224,7 +228,7 @@ describe StyleChecker do
         it "uses unsupported style guide" do
           commit_file = stub_commit_file(
             "fortran.f",
-            %{PRINT *, "Hello World!"\nEND}
+            %{PRINT *, "Hello World!"\nEND},
           )
           pull_request = stub_pull_request(commit_files: [commit_file])
 
@@ -249,7 +253,7 @@ describe StyleChecker do
       file_content: "",
       head_commit: head_commit,
       commit_files: [],
-      repository_owner_name: "some_org"
+      repository_owner_name: "some_org",
     }
 
     double("PullRequest", defaults.merge(options))
@@ -265,7 +269,7 @@ describe StyleChecker do
       line_at: line,
       sha: "abc123",
       patch: "patch",
-      pull_request_number: 123
+      pull_request_number: 123,
     )
   end
 
